@@ -1,0 +1,70 @@
+const MAX_TRIES = 7;
+const WORDS = ["openai", "chatgpt", "hangman"];
+
+function main() {
+    const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+    const guessedChars = new Set();
+    let triesLeft = MAX_TRIES;
+
+    while (triesLeft > 0) {
+        console.log(`You have ${triesLeft} tries left.`);
+        process.stdout.write("Guessed characters: ");
+        for (const ch of guessedChars) {
+            process.stdout.write(`${ch} `);
+        }
+        process.stdout.write("\nWord: ");
+        let found = false;
+        for (const ch of word) {
+            if (guessedChars.has(ch)) {
+                process.stdout.write(ch);
+                found = true;
+            } else {
+                process.stdout.write("_");
+            }
+        }
+        console.log();
+
+        if (found && !word.split('').some(ch => !guessedChars.has(ch))) {
+            console.log("Congratulations, you've won!");
+            return;
+        }
+
+        const guess = readChar("Your guess: ");
+        if (guessedChars.has(guess)) {
+            console.log("You've already guessed that character.");
+            continue;
+        }
+
+        guessedChars.add(guess);
+        if (word.includes(guess)) {
+            console.log("Good guess!");
+        } else {
+            console.log("Oops! That letter is not in the word.");
+            triesLeft--;
+        }
+    }
+
+    console.log(`You've lost! The word was '${word}'`);
+}
+
+function readChar(prompt) {
+    const readline = require('readline');
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    return new Promise(resolve => {
+        rl.question(prompt, answer => {
+            rl.close();
+            resolve(answer.trim().charAt(0));
+        });
+    });
+}
+
+// To make the game asynchronous and allow for user input
+async function playGame() {
+    await main();
+}
+
+playGame();
